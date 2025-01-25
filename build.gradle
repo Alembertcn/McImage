@@ -64,7 +64,7 @@ dependencies {
 
 ext {
     publishVersion = '1.5.2'
-    publishGroup = 'wb.mobcase'
+    publishGroup = 'wb.plugins'
     moduleName = 'McImage'
     descContent = 'material design控件换肤支持包'
 }
