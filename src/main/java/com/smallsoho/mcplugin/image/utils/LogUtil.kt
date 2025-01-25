@@ -1,5 +1,6 @@
 package com.smallsoho.mcplugin.image.utils
 
+import java.io.File
 import java.lang.Exception
 
 class LogUtil {
@@ -16,6 +17,9 @@ class LogUtil {
 
         fun log(str: String) {
             println(str)
+        }
+        fun log(str: String,file: File) {
+            file.appendText("\n$str")
         }
 
         fun log(exception: Exception) {

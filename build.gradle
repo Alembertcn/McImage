@@ -1,10 +1,27 @@
 apply plugin: 'kotlin'
-apply from: 'publish.gradle'
-
 buildscript {
     repositories {
-        jcenter()
+        maven {
+            allowInsecureProtocol = true
+            url 'https://web-gy.httester.com/repository/maven-public/'
+            credentials{
+                username System.getenv("WB_REPO_USER")
+                password System.getenv("WB_REPO_PWD")
+            }
+        }
+        // 配置Mob Maven库
+        maven { url "https://mvn.mob.com/android" }
+        maven { url "https://mirrors.tencent.com/repository/maven/tencent_public" }
+        maven { url "https://mirrors.tencent.com/repository/maven/liteavsdk" }
+        maven { url "https://mirrors.tencent.com/nexus/repository/maven-public/" }
+
+
+        maven {
+            url "https://maven.aliyun.com/repository/gradle-plugin"
+        }
+        maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
         google()
+        mavenCentral()
     }
 
     dependencies {
@@ -15,13 +32,40 @@ buildscript {
 
 allprojects {
     repositories {
-        jcenter()
+        maven {
+            allowInsecureProtocol = true
+            url 'https://web-gy.httester.com/repository/maven-public/'
+            credentials{
+                username System.getenv("WB_REPO_USER")
+                password System.getenv("WB_REPO_PWD")
+            }
+        }
+        // 配置Mob Maven库
+        maven { url "https://mvn.mob.com/android" }
+        maven { url "https://mirrors.tencent.com/repository/maven/tencent_public" }
+        maven { url "https://mirrors.tencent.com/repository/maven/liteavsdk" }
+        maven { url "https://mirrors.tencent.com/nexus/repository/maven-public/" }
+
+
+        maven {
+            url "https://maven.aliyun.com/repository/gradle-plugin"
+        }
+        maven { url 'https://raw.githubusercontent.com/martinloren/AabResGuard/mvn-repo' }
         google()
+        mavenCentral()
     }
 }
 
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:gradle:3.5.0'
+    implementation 'com.android.tools.build:gradle:4.2.2'
 }
+
+ext {
+    publishVersion = '1.5.2'
+    publishGroup = 'wb.mobcase'
+    moduleName = 'McImage'
+    descContent = 'material design控件换肤支持包'
+}
+apply from: 'publish.gradle'

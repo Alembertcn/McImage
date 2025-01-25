@@ -30,7 +30,7 @@ class WebpUtils {
                     if (webpFile.exists()) {
                         webpFile.delete()
                     }
-                    LogUtil.log("[${TAG}][${imgFile.name}] do not convert webp because the size become larger!")
+                    LogUtil.log("[${TAG}][${imgFile.name}] do not convert webp because the size become larger!",File(FileUtil.getToolsDirPath(), "log.txt"))
                 }
             }
         }

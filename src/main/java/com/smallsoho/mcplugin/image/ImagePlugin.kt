@@ -2,10 +2,13 @@ package com.smallsoho.mcplugin.image
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
+import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.BaseVariantImpl
+import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.smallsoho.mcplugin.image.`interface`.IBigImage
 import com.smallsoho.mcplugin.image.utils.*
 import com.smallsoho.mcplugin.image.webp.WebpUtils
+import org.gradle.api.DomainObjectSet
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -16,13 +19,15 @@ import java.util.concurrent.Executors
 import java.util.concurrent.Future
 
 class ImagePlugin : Plugin<Project> {
+    companion object{
+        private var app: AppExtension?=null
+    }
 
     private lateinit var mcImageProject: Project
     private lateinit var mcImageConfig: Config
     private var oldSize: Long = 0
     private var newSize: Long = 0
     val bigImgList = ArrayList<String>()
-
     var isDebugTask = false
     var isContainAssembleTask = false
 
@@ -33,7 +38,9 @@ class ImagePlugin : Plugin<Project> {
         //check is library or application
         val hasAppPlugin = project.plugins.hasPlugin("com.android.application")
         val variants = if (hasAppPlugin) {
-            (project.property("android") as AppExtension).applicationVariants
+            (project.property("android") as AppExtension).apply {
+                app = this
+            }.applicationVariants
         } else {
             (project.property("android") as LibraryExtension).libraryVariants
         }
@@ -41,10 +48,14 @@ class ImagePlugin : Plugin<Project> {
         //set config
         project.extensions.create("McImageConfig", Config::class.java)
         mcImageConfig = project.property("McImageConfig") as Config
+        checkMcTools(project)
+        LogUtil.log("---- McImage apply project.name ${project.name} ----",File(FileUtil.getToolsDirPath(), "log.txt"))
 
         project.gradle.taskGraph.whenReady {
             it.allTasks.forEach { task ->
                 val taskName = task.name
+                LogUtil.log("---- McImage allTasks project.name ${project.name} taskName $taskName----",File(FileUtil.getToolsDirPath(), "log.txt"))
+
                 if (taskName.contains("assemble") || taskName.contains("resguard") || taskName.contains("bundle")) {
                     if (taskName.toLowerCase().endsWith("debug") &&
                             taskName.toLowerCase().contains("debug")) {
@@ -55,15 +66,17 @@ class ImagePlugin : Plugin<Project> {
                 }
             }
         }
-
         project.afterEvaluate {
+            LogUtil.log("---- McImage project afterEvaluate project.name ${project.name}  variants $variants----",File(FileUtil.getToolsDirPath(), "log.txt"))
+
             variants.all { variant ->
 
                 variant as BaseVariantImpl
+                val mergeResourcesTask = variant.mergeResourcesProvider.get()
 
                 checkMcTools(project)
+                LogUtil.log("---- McImage mergeResourcesTask project ${project.name}  ${mergeResourcesTask.name}----",File(FileUtil.getToolsDirPath(), "log.txt"))
 
-                val mergeResourcesTask = variant.mergeResourcesProvider.get()
                 val mcPicTask = project.task("McImage${variant.name.capitalize()}")
 
                 mcPicTask.doLast {
@@ -73,10 +86,12 @@ class ImagePlugin : Plugin<Project> {
                         LogUtil.log("Debug not run ^_^")
                         return@doLast
                     }
+                    LogUtil.log("---- McImage start ${project.name} ----",File(FileUtil.getToolsDirPath(), "log.txt"))
 
                     //assemble passed
                     if (!isContainAssembleTask) {
-                        LogUtil.log("Don't contain assemble task, mcimage passed")
+
+                        LogUtil.log("Don't contain assemble task, mcimage passed ${project.name}",File(FileUtil.getToolsDirPath(), "log.txt"))
                         return@doLast
                     }
 
@@ -90,6 +105,11 @@ class ImagePlugin : Plugin<Project> {
                     val imageFileList = ArrayList<File>()
 
                     for (channelDir: File in dir) {
+                        if (mcImageConfig.onlyDir!=null && !channelDir.absolutePath.contains(mcImageConfig.onlyDir)) {
+                            continue
+                        }
+                        LogUtil.log("---- McImage traverseResDir $channelDir ----",File(FileUtil.getToolsDirPath(), "log.txt"))
+
                         traverseResDir(channelDir, imageFileList, cacheList, object : IBigImage {
                             override fun onBigImage(file: File) {
                                 bigImgList.add(file.absolutePath)
@@ -120,6 +140,13 @@ class ImagePlugin : Plugin<Project> {
                 (project.tasks.findByName(chmodTask.name) as Task).dependsOn(mergeResourcesTask.taskDependencies.getDependencies(mergeResourcesTask))
                 (project.tasks.findByName(mcPicTask.name) as Task).dependsOn(project.tasks.findByName(chmodTask.name) as Task)
                 mergeResourcesTask.dependsOn(project.tasks.findByName(mcPicTask.name))
+//                if(!hasAppPlugin){
+//                    app?.applicationVariants?.forEach { variant ->
+//                        if (variant.name.toLowerCase().contains("release")) {
+//                            variant.mergeResourcesProvider.get().dependsOn(mergeResourcesTask)
+//                        }
+//                    }
+//                }
 
             }
         }
