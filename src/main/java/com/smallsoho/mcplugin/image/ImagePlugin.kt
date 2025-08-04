@@ -2,13 +2,10 @@ package com.smallsoho.mcplugin.image
 
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.LibraryExtension
-import com.android.build.gradle.api.ApplicationVariant
 import com.android.build.gradle.internal.api.BaseVariantImpl
-import com.android.build.gradle.internal.tasks.factory.dependsOn
 import com.smallsoho.mcplugin.image.`interface`.IBigImage
 import com.smallsoho.mcplugin.image.utils.*
 import com.smallsoho.mcplugin.image.webp.WebpUtils
-import org.gradle.api.DomainObjectSet
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -83,15 +80,14 @@ class ImagePlugin : Plugin<Project> {
 
                     //debug enable
                     if (isDebugTask && !mcImageConfig.enableWhenDebug) {
-                        LogUtil.log("Debug not run ^_^")
+                        LogUtil.log("---- McImage Debug not run ^_^")
                         return@doLast
                     }
                     LogUtil.log("---- McImage start ${project.name} ----",File(FileUtil.getToolsDirPath(), "log.txt"))
 
                     //assemble passed
-                    if (!isContainAssembleTask) {
-
-                        LogUtil.log("Don't contain assemble task, mcimage passed ${project.name}",File(FileUtil.getToolsDirPath(), "log.txt"))
+                    if (!isContainAssembleTask && !mcImageConfig.isSingleRun) {
+                        LogUtil.log("---- McImage Don't contain assemble task, mcimage passed ${project.name}",File(FileUtil.getToolsDirPath(), "log.txt"))
                         return@doLast
                     }
 

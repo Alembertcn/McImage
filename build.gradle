@@ -3,7 +3,7 @@ buildscript {
     repositories {
         maven {
             allowInsecureProtocol = true
-            url 'https://web-gy.httester.com/repository/maven-public/'
+            url 'https://nexus.jinhui.pro/repository/maven-android-public/'
             credentials{
                 username System.getenv("WB_REPO_USER")
                 password System.getenv("WB_REPO_PWD")
@@ -34,7 +34,7 @@ allprojects {
     repositories {
         maven {
             allowInsecureProtocol = true
-            url 'https://web-gy.httester.com/repository/maven-public/'
+            url 'https://nexus.jinhui.pro/repository/maven-android-public/'
             credentials{
                 username System.getenv("WB_REPO_USER")
                 password System.getenv("WB_REPO_PWD")
@@ -66,6 +66,6 @@ ext {
     publishVersion = '1.5.2'
     publishGroup = 'wb.plugins'
     moduleName = 'McImage'
-    descContent = 'material design控件换肤支持包'
+    descContent = '图片压缩'
 }
 apply from: 'publish.gradle'
